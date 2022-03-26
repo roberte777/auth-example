@@ -105,7 +105,7 @@ export default function AllInOne() {
       >
         Test
       </button>
-      <div>Current User: {user}</div>
+      <div>Current User: {user || "Not Signed In"}</div>
     </div>
   );
 }
