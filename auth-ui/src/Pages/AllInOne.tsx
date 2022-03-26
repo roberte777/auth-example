@@ -21,7 +21,7 @@ const login = gql`
 `;
 
 export default function AllInOne() {
-  const { user } = useAuth();
+  const { user, login, userLoading } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [createUsername, setCreateUsername] = useState("");
@@ -30,9 +30,10 @@ export default function AllInOne() {
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (loading) {
+  if (loading || userLoading) {
     return <h1>Loading...</h1>;
   }
+
   return (
     <div className="App">
       <div className="login">
@@ -48,11 +49,7 @@ export default function AllInOne() {
         <button
           onClick={async () => {
             setLoading(true);
-            const resp = await request("/graphql", login, {
-              username,
-              password,
-            });
-            setToken(resp.login.token);
+            await login(username, password);
             setLoading(false);
           }}
         >
@@ -105,7 +102,8 @@ export default function AllInOne() {
       >
         Test
       </button>
-      <div>Current User: {user || "Not Signed In"}</div>
+      <div>Current User: {user.username || "Not Signed In"}</div>
+      <div>User Loading: {userLoading ? "true" : "false"}</div>
     </div>
   );
 }

@@ -19,12 +19,18 @@ const loginQuery = gql`
   }
 `;
 
-const AuthContext = createContext({ user: null });
+const AuthContext = createContext({
+  user: null as any,
+  login: async (username: string, password: string) => {},
+  signup: async (username: string, email: string, password: string) => {},
+  signout: () => {},
+  userLoading: true,
+});
 // Provider component that wraps your app and makes auth object ...
 // ... available to any child component that calls useAuth().
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const auth = useProvideAuth();
-
+  console.log(auth.user);
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 }
 // Hook for child components to get the auth object ...
@@ -34,24 +40,27 @@ export const useAuth = () => {
 };
 // Provider hook that creates auth object and handles state
 function useProvideAuth() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<{ username: string } | null>(null);
+  const [userLoading, setUserLoading] = useState<boolean>(true);
   // Wrap any Firebase methods we want to use making sure ...
   // ... to save the user to state.
-  const signin = (username: string, password: string) => {
-    return request("/graphql", loginQuery, { username, password }).then(
+  const login = async (username: string, password: string) => {
+    return await request("/graphql", loginQuery, { username, password }).then(
       (res) => {
         setUser(res.login.user);
         return res.login.user;
       }
     );
   };
-  const signup = (username: string, email: string, password: string) => {
-    return request("/graphql", createUser, { username, password, email }).then(
-      (res) => {
-        setUser(res.createUser.user);
-        return res.createUser.user;
-      }
-    );
+  const signup = async (username: string, email: string, password: string) => {
+    return await request("/graphql", createUser, {
+      username,
+      password,
+      email,
+    }).then((res) => {
+      setUser(res.createUser.user);
+      return res.createUser.user;
+    });
   };
   const signout = () => {
     // return firebase
@@ -79,13 +88,12 @@ function useProvideAuth() {
   //     });
   // };
 
-  // Subscribe to user on mount
   // Because this sets state in the callback it will cause any ...
   // ... component that utilizes this hook to re-render with the ...
   // ... latest auth object.
   useEffect(() => {
     async function findUser() {
-      console.log("ran finduser");
+      setUserLoading(true);
       const user = await request(
         "/graphql",
         gql`
@@ -95,17 +103,23 @@ function useProvideAuth() {
             }
           }
         `
-      ).catch((e) => setUser(null));
-      setUser(user.user.username);
+      ).catch((e) => {
+        console.log(e);
+        setUser(null);
+        setUserLoading(false);
+      });
+      setUser(user.user);
+      setUserLoading(false);
     }
     findUser();
   }, []);
   // Return the user object and auth methods
   return {
     user,
-    signin,
+    login,
     signup,
     signout,
+    userLoading,
     // sendPasswordResetEmail,
     // confirmPasswordReset,
   };
