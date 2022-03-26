@@ -26,7 +26,11 @@ function App() {
   const [createPassword, setCreatePassword] = useState("");
   const [createEmail, setCreateEmail] = useState("");
   const [token, setToken] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  if (loading) {
+    return <h1>Loading...</h1>;
+  }
   return (
     <div className="App">
       <div className="login">
@@ -41,11 +45,13 @@ function App() {
         ></input>
         <button
           onClick={async () => {
+            setLoading(true);
             const resp = await request("/graphql", login, {
               username,
               password,
             });
             setToken(resp.login.token);
+            setLoading(false);
           }}
         >
           Login
@@ -67,12 +73,14 @@ function App() {
         />
         <button
           onClick={async () => {
+            setLoading(true);
             const resp = await request("/graphql", createUser, {
               username: createUsername,
               email: createEmail,
               password: createPassword,
             });
             console.log(resp);
+            setLoading(false);
           }}
         >
           Create User
