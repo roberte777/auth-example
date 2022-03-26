@@ -15,6 +15,7 @@ const typeDefs = gql`
   }
 
   type Query {
+    user: User
     hello: String
     getUsers: [User]
   }

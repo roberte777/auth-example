@@ -19,8 +19,14 @@ export const createRefreshToken = (user: any) => {
 import { Response } from "express";
 
 export const sendRefreshToken = (res: Response, token: string) => {
-  res.cookie("jid", token, {
+  res.cookie("refreshToken", token, {
     httpOnly: true,
-    path: "/refresh_token",
+    path: "/",
+  });
+};
+export const sendAccessToken = (res: Response, token: string) => {
+  res.cookie("accessToken", token, {
+    httpOnly: true,
+    path: "/",
   });
 };

@@ -2,9 +2,11 @@ import { PrismaClient } from "@prisma/client";
 import {
   createAccessToken,
   createRefreshToken,
+  sendAccessToken,
   sendRefreshToken,
 } from "../libs/tokens";
 import { Request, Response } from "express";
+import { JwtPayload, verify } from "jsonwebtoken";
 const bcrypt = require("bcrypt");
 
 type Context = {
@@ -15,6 +17,24 @@ type Context = {
 const resolvers = {
   Query: {
     hello: () => "hello world!",
+    user: (_: any, __: any, ctx: Context) => {
+      const { accessToken } = ctx.req.cookies;
+      if (!accessToken) {
+        console.log("no access token");
+        throw new Error("not authenticated");
+      }
+      try {
+        const { userId } = verify(
+          accessToken,
+          process.env.ACCESS_TOKEN_SECRET!
+        ) as any;
+
+        return ctx.prisma.user.findUnique({ where: { username: userId } });
+      } catch (err) {
+        console.log(err);
+        throw new Error("not authenticated");
+      }
+    },
     getUsers: async (_: any, __: any, ctx: Context) => {
       return await ctx.prisma.user.findMany();
     },
@@ -64,9 +84,11 @@ const resolvers = {
       if (!valid) {
         throw new Error("Invalid password");
       }
+      const accessToken = createAccessToken(user);
       sendRefreshToken(context.res, createRefreshToken(user));
+      sendAccessToken(context.res, accessToken);
       console.log(user.username);
-      return { user: user, token: createAccessToken(user) };
+      return { user: user, token: accessToken };
     },
   },
 };

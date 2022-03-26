@@ -25,22 +25,7 @@ const prisma = new PrismaClient();
     },
   };
   app.use(cors(corsOptions));
-  // app.use((req, res, next) => {
-  //   const allowedOrigins = [
-  //     "http://localhost:3000",
-  //     "https://studio.apollographql.com",
-  //   ];
-  //   const origin = req.headers.origin;
-  //   console.log("test1");
-  //   if (allowedOrigins.includes(origin!)) {
-  //     console.log("test2");
-  //     res.setHeader("Access-Control-Allow-Origin", origin!);
-  //   }
-  //   res.header("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS");
-  //   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  //   res.header("Access-Control-Allow-Credentials", "true");
-  //   return next();
-  // });
+
   app.use(cookieParser());
   app.get("/", (_req, res) => res.send("hello"));
   app.post("/refresh_token", async (req, res) => {
