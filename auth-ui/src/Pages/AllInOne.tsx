@@ -27,7 +27,6 @@ export default function AllInOne() {
   const [createUsername, setCreateUsername] = useState("");
   const [createPassword, setCreatePassword] = useState("");
   const [createEmail, setCreateEmail] = useState("");
-  const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (loading || userLoading) {
@@ -86,7 +85,6 @@ export default function AllInOne() {
           Create User
         </button>
       </div>
-      {token}
       <button
         onClick={async () => {
           const res = await request(
