@@ -21,7 +21,7 @@ const login = gql`
 `;
 
 export default function AllInOne() {
-  const { user, login, userLoading } = useAuth();
+  const { user, login, userLoading, signout } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [createUsername, setCreateUsername] = useState("");
@@ -31,6 +31,7 @@ export default function AllInOne() {
   const [loading, setLoading] = useState(false);
 
   if (loading || userLoading) {
+    console.log(loading, userLoading);
     return <h1>Loading...</h1>;
   }
 
@@ -102,8 +103,15 @@ export default function AllInOne() {
       >
         Test
       </button>
-      <div>Current User: {user.username || "Not Signed In"}</div>
+      <div>Current User: {user?.username || "Not Signed In"}</div>
       <div>User Loading: {userLoading ? "true" : "false"}</div>
+      <button
+        onClick={async () => {
+          await signout();
+        }}
+      >
+        Logout
+      </button>
     </div>
   );
 }

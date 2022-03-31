@@ -30,3 +30,8 @@ export const sendAccessToken = (res: Response, token: string) => {
     path: "/",
   });
 };
+
+export const clearCookies = (res: Response) => {
+  res.clearCookie("refreshToken");
+  res.clearCookie("accessToken");
+};

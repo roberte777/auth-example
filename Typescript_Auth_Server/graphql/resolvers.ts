@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import {
+  clearCookies,
   createAccessToken,
   createRefreshToken,
   sendAccessToken,
@@ -89,6 +90,9 @@ const resolvers = {
       sendAccessToken(context.res, accessToken);
       console.log(user.username);
       return { user: user, token: accessToken };
+    },
+    async logout(_: any, __: any, ctx: Context) {
+      clearCookies(ctx.res);
     },
   },
 };

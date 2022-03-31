@@ -29,6 +29,7 @@ const typeDefs = gql`
       phone: String
     ): User
     login(username: String!, password: String!): AuthResponse
+    logout: String
   }
 `;
 

@@ -1,6 +1,7 @@
 // Hook (use-auth.js)
 import request, { gql } from "graphql-request";
 import React, { useState, useEffect, useContext, createContext } from "react";
+import { useLocation } from "react-router-dom";
 const createUser = gql`
   mutation createUser($username: String!, $password: String!, $email: String!) {
     createUser(username: $username, password: $password, email: $email) {
@@ -30,7 +31,6 @@ const AuthContext = createContext({
 // ... available to any child component that calls useAuth().
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const auth = useProvideAuth();
-  console.log(auth.user);
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 }
 // Hook for child components to get the auth object ...
@@ -62,7 +62,8 @@ function useProvideAuth() {
       return res.createUser.user;
     });
   };
-  const signout = () => {
+
+  const signout = async () => {
     // return firebase
     //   .auth()
     //   .signOut()
@@ -70,6 +71,14 @@ function useProvideAuth() {
     //     setUser(false);
     //   });
     setUser(null);
+    await request(
+      "/graphql",
+      gql`
+        mutation Mutation {
+          logout
+        }
+      `
+    );
   };
   // const sendPasswordResetEmail = (email) => {
   //   return firebase
@@ -94,25 +103,28 @@ function useProvideAuth() {
   useEffect(() => {
     async function findUser() {
       setUserLoading(true);
-      const user = await request(
-        "/graphql",
-        gql`
-          {
-            user {
-              username
+      try {
+        const user = await request(
+          "/graphql",
+          gql`
+            {
+              user {
+                username
+              }
             }
-          }
-        `
-      ).catch((e) => {
-        console.log(e);
+          `
+        );
+        setUser(user?.user);
+        setUserLoading(false);
+      } catch (e) {
+        console.error(e);
         setUser(null);
         setUserLoading(false);
-      });
-      setUser(user.user);
-      setUserLoading(false);
+      }
     }
     findUser();
   }, []);
+
   // Return the user object and auth methods
   return {
     user,
